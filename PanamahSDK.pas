@@ -213,6 +213,11 @@ type
     procedure Delete(ATrocaFormaPagamento: IPanamahTrocaFormaPagamento); overload;
     procedure Delete(AVenda: IPanamahVenda); overload;
 
+    procedure SaveModel(APanamahModel: IPanamahModel); overload;
+    procedure SaveModel(APanamahModel: IPanamahModel; AAssinanteId: Variant); overload;
+    procedure DeleteModel(APanamahModel: IPanamahModel); overload;
+    procedure DeleteModel(APanamahModel: IPanamahModel; AAssinanteId: Variant); overload;
+
     property OnCurrentBatchExpired: TPanamahBatchEvent read GetOnCurrentBatchExpired write SetOnCurrentBatchExpired;
     property OnBeforeObjectAddedToBatch: TPanamahModelEvent read GetOnBeforeObjectAddedToBatch write SetOnBeforeObjectAddedToBatch;
     property OnBeforeBatchSent: TPanamahBatchEvent read GetOnBeforeBatchSent write SetOnBeforeBatchSent;
@@ -240,7 +245,7 @@ uses
 procedure TPanamahStream.Init(AConfig: IPanamahStreamConfig);
 begin
   FConfig := AConfig;
-  if not {$IFDEF UNICODE}FProcessor.Started{$ELSE}not FProcessor.Suspended{$ENDIF} then
+  if {$IFDEF UNICODE}not FProcessor.Started{$ELSE}FProcessor.Suspended{$ENDIF} then
     FProcessor.Start(FConfig);
 end;
 
@@ -279,7 +284,7 @@ end;
 
 procedure TPanamahStream.Init;
 begin
-  Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'), GetEnvironmentVariable('PANAMAH_SECRET'));
+  Init(GetEnvironmentVariable('PANAMAH_AUTHORIZATION_TOKEN'), GetEnvironmentVariable('PANAMAH_SECRET'), GetEnvironmentVariable('PANAMAH_ASSINANTE_ID'));
 end;
 
 procedure TPanamahStream.SetOnAfterDelete(AEvent: TPanamahModelEvent);
@@ -709,6 +714,16 @@ begin
   Save(AVenda, FConfig.AssinanteId);
 end;
 
+procedure TPanamahStream.SaveModel(APanamahModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  FProcessor.Save(APanamahModel, AAssinanteId);
+end;
+
+procedure TPanamahStream.SaveModel(APanamahModel: IPanamahModel);
+begin
+  SaveModel(APanamahModel, FConfig.AssinanteId);
+end;
+
 procedure TPanamahStream.Delete(AAcesso: IPanamahAcesso);
 begin
   Delete(AAcesso, FConfig.AssinanteId);
@@ -822,6 +837,16 @@ end;
 procedure TPanamahStream.Delete(AVenda: IPanamahVenda);
 begin
   Delete(AVenda, FConfig.AssinanteId);
+end;
+
+procedure TPanamahStream.DeleteModel(APanamahModel: IPanamahModel; AAssinanteId: Variant);
+begin
+  FProcessor.Delete(APanamahModel, AAssinanteId);
+end;
+
+procedure TPanamahStream.DeleteModel(APanamahModel: IPanamahModel);
+begin
+  DeleteModel(APanamahModel, FConfig.AssinanteId);
 end;
 
 constructor TPanamahStream.Create;
