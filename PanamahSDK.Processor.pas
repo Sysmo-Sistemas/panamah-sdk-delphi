@@ -263,9 +263,11 @@ procedure TPanamahBatchProcessor.AddOperationToCurrentBatch(AOperationType: TPan
   AModel: IPanamahModel; AAssinanteId: Variant);
 begin
   DoOnBeforeObjectAddedToBatch(AModel, AAssinanteId);
-  FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone, AAssinanteId));
+
   FCriticalSection.Acquire;
   try
+    FCurrentBatch.Add(TPanamahOperation.Create(AOperationType, AModel.Clone, AAssinanteId));
+
     if BatchExpiredByCount(FConfig.BatchMaxCount) then
     begin
       ExpireCurrentBatch;
